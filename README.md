@@ -8,12 +8,12 @@ server.js: The "brain" of the webpage, it handles all 11 Express routes, manages
 
 createDB.js: A setup script used to initialize the SQLite database, create tables, and generate the initial hashed user credentials using Bcrypt.
 
-index.ejs: The main dashboard that dynamically renders the user's tasks, progress bars, and the Canvas-based completion meter.
+index.ejs: The main dashboard that dynamically renders the user's tasks, progress bars, and the Canvas based completion meter.
 
 login.ejs: The secure entry point of the webpage featuring the Math Captcha challenge and the user authentication form.
 
 wiki.ejs: The technical documentation page that explains the "how" and "why" behind the project's advanced features.
 
-style.css: The central stylesheet containing custom gradients, card hover animations, and the layout rules for the entire hub.
+style.css: The central stylesheet containing custom gradients, card hover animations, and the layout rules for the entire web.
 
 productivity.db: The SQLite database file where all user accounts, login history, and task data are stored.
