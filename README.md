@@ -3,6 +3,7 @@ The Productivity Hub is a persistent website designed to optimize personal workf
 
 # Project Structure & File Descriptions
 Below is a brief description of the core files that power the Productivity Hub:
+
 server.js: The "brain" of the app; it handles all 11 Express routes, manages user sessions, and communicates with the database.
 
 createDB.js: A setup script used to initialize the SQLite database, create tables, and generate the initial hashed user credentials using Bcrypt.
