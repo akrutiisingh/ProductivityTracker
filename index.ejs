@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Productivity Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!--Helps with icons which are used (bibi)-->
+    <link href="/style.css" rel="stylesheet">
+</head>
+
+<body class="bg-gradient">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm"> <!-- Navigation Bar for login, wiki-->
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="bi bi-fire me-2"></i>Productivity Hub
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3">
+                    <i class="bi bi-person me-1"></i>
+                    <%= user.username %>
+                </span> <!-- Display logged in username -->
+                <a class="nav-link" href="/wiki"><i class="bi bi-book"></i> Wiki</a>
+                <a class="nav-link" href="/logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="row mb-5">
+            <div class="col-md-3">
+                <div class="card shadow-lg text-center border-0 h-100">
+                    <div class="card-body">
+                        <i class="bi bi-fire display-4 text-warning"></i>
+                        <h3 id="streakCount">0</h3> <!-- Streak count will be loaded -->
+                        <p class="text-muted">Day Streak</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-lg text-center border-0 h-100">
+                    <div class="card-body">
+                        <i class="bi bi-check-circle display-4 text-success"></i>
+                        <h3>
+                            <%= stats.done %>
+                        </h3>
+                        <p class="text-muted">Completed</p> <!-- Completed tasks count -->
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-lg text-center border-0 h-100">
+                    <div class="card-body">
+                        <i class="bi bi-clock-history display-4 text-info"></i>
+                        <h3>
+                            <%= stats.total %>
+                        </h3>
+                        <p class="text-muted">Total Tasks</p> <!-- Total tasks count -->
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-lg text-center border-0 h-100">
+                    <div class="card-body">
+                        <i class="bi bi-graph-up display-4 text-primary"></i>
+                        <h3>
+                            <%= stats.rate %>%
+                        </h3>
+                        <p class="text-muted">Completion</p> <!-- Completion rate percentage -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-5">
+            <div class="col-md-8">
+                <div class="card shadow-lg border-0 h-100">
+                    <div class="card-header bg-transparent">
+                        <h5 class="mb-0">Productivity Overview</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row mb-4">
+                            <% ['Work', 'Health' , 'Personal' , 'Others' ].forEach(cat=> {
+                                const totalInCat = stats.categories[cat] || 0;
+                                const doneInCat = stats.catDone ? (stats.catDone[cat] || 0) : 0;
+                                const catRate = totalInCat > 0 ? Math.round((doneInCat / totalInCat) * 100) : 0;
+                                %>
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span>
+                                            <%= cat %> (<%= doneInCat %>/<%= totalInCat %>)
+                                        </span>
+                                        <span>
+                                            <%= catRate %>%
+                                        </span>
+                                    </div>
+                                    <div class="progress" style="height: 12px;">
+                                        <div class="progress-bar bg-primary" style="width: <%= catRate %>%;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <% }) %>
+                        </div>
+
+                        <div class="text-center">
+                            <div class="d-flex align-items-center justify-content-center mb-3">
+                                <canvas id="completionCanvas" width="150" height="150"></canvas>
+                            </div>
+                            <h6 class="text-muted">Overall Completion Status</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4" id="rightSidebar">
+                <div class="card shadow-lg border-0 mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-plus-circle"></i> New Task</h5>
+                        <form action="/tasks" method="POST">
+                            <div class="mb-3">
+                                <input type="text" name="title" class="form-control" placeholder="Task title..."
+                                    required>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <select name="category" class="form-select">
+                                        <option value="Work">Work</option>
+                                        <option value="Personal">Personal</option>
+                                        <option value="Health">Health</option>
+                                        <option value="Others">Others</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <select name="priority" class="form-select">
+                                        <option value="High">High</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="Low">Low</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <input type="date" name="due_date" class="form-control">
+                            </div>
+                            <button class="btn btn-primary w-100"><i class="bi bi-plus"></i> Add Task</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                <h3 class="mb-0"><i class="bi bi-list-task"></i> Tasks</h3>
+                <div class="d-flex gap-2">
+                    <select id="filterCategory" class="form-select form-select-sm" style="width: auto;">
+                        <option value="all">All Categories</option>
+                        <option value="Work">Work</option>
+                        <option value="Personal">Personal</option>
+                        <option value="Health">Health</option>
+                        <option value="Others">Others</option>
+                    </select>
+                    <select id="filterPriority" class="form-select form-select-sm" style="width: auto;">
+                        <option value="all">All Priorities</option>
+                        <option value="High">High</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Low">Low</option>
+                    </select>
+                    <span class="badge bg-secondary d-flex align-items-center">
+                        <%= stats.total %> Total <!-- Badge showing total tasks -->
+                    </span>
+                </div>
+            </div>
+                <div class="card-body p-0">
+                    <% if (tasks.length===0) { %>
+                        <div class="text-center py-5">
+                            <i class="bi bi-check-circle display-1 text-muted opacity-50 mb-4"></i>
+                            <h4 class="text-muted">No tasks yet!</h4> <!-- Message when there are no tasks -->
+                        </div>
+                        <% } else { %>
+                            <div class="row g-3 p-4">
+                                <% tasks.forEach(task=> { %>
+                                    <div class="col-lg-4 col-md-6 task-card-item" data-category="<%= task.category %>"
+                                        data-priority="<%= task.priority %>">
+                                        <div class="card h-100 <%= task.completed ? 'border-success bg-light-subtle' : 
+                                  task.display_priority === 'Overdue' ? 'border-danger bg-danger-subtle' : 
+                                  task.display_priority === 'High' ? 'border-warning bg-warning-subtle' : '' %>">
+                                            <!-- Card color based on task status ie if success then green, overdue then red and if high priority then yellow-->
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <span
+                                                        class="badge <%= task.completed ? 'bg-success' : 'bg-info' %>">
+                                                        <!-- Badge color based on completion status-->
+                                                        <%= task.completed ? 'Done' : task.display_priority %>
+                                                    </span>
+                                                    <small class="text-muted">
+                                                        <%= (task.due_date || task.created_at).slice(0,10) %>
+                                                            <!-- Display due date -->
+                                                    </small>
+                                                </div>
+                                                <h6
+                                                    class="card-title <%= task.completed ? 'text-decoration-line-through text-success' : '' %>">
+                                                    <%= task.title %>
+                                                        <!-- Task title with strikethrough if completed -->
+                                                </h6>
+                                                <p class="small mb-3"><span
+                                                        class="badge bg-light text-dark text-capitalize">
+                                                        <%= task.category %>
+                                                    </span></p>
+
+                                                <div class="d-flex gap-2">
+                                                    <% if (!task.completed) { %>
+                                                        <form action="/tasks/<%= task.id %>/complete" method="POST">
+                                                            <button class="btn btn-sm btn-success"><i
+                                                                    class="bi bi-check-lg"></i></button>
+                                                            <!-- Button to mark task as complete -->
+                                                        </form>
+                                                        <button class="btn btn-sm btn-outline-primary"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#editModal<%= task.id %>">
+                                                            <i class="bi bi-pencil"></i>
+                                                            <!-- Button to open edit task -->
+                                                        </button>
+                                                        <% } %>
+                                                            <form action="/tasks/<%= task.id %>/delete" method="POST"
+                                                                onsubmit="return confirm('Delete?')">
+                                                                <button class="btn btn-sm btn-outline-danger"><i
+                                                                        class="bi bi-trash"></i></button>
+                                                                <!-- Button to delete task -->
+                                                            </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <% }) %>
+                            </div>
+                            <% } %>
+                </div>
+            </div>
+        </div>
+
+        <% tasks.forEach(task=> { %> <!-- If user chooses to edit task -->
+            <div class="modal fade" id="editModal<%= task.id %>" tabindex="-1" aria-labelledby="editLabel<%= task.id %>"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form action="/tasks/<%= task.id %>/edit" method="POST">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editLabel<%= task.id %>">Edit Task</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                                <!-- Close button for modal -->
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Task Title</label>
+                                    <input type="text" name="title" class="form-control" value="<%= task.title %>"
+                                        required>
+                                </div> <!-- Input field for task title -->
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Category</label>
+                                        <select name="category" class="form-select">
+                                            <option value="Work" <%=task.category==='Work' ? 'selected' : '' %>>Work
+                                            </option>
+                                            <option value="Personal" <%=task.category==='Personal' ? 'selected' : '' %>>
+                                                Personal</option>
+                                            <option value="Health" <%=task.category==='Health' ? 'selected' : '' %>>
+                                                Health</option>
+                                            <option value="Others" <%=task.category==='Others' ? 'selected' : '' %>>
+                                                Others</option>
+                                        </select>
+                                    </div> <!-- Dropdown for task category so we can change it -->
+
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Priority</label>
+                                        <select name="priority" class="form-select">
+                                            <option value="High" <%=task.priority==='High' ? 'selected' : '' %>>High
+                                            </option>
+                                            <option value="Medium" <%=task.priority==='Medium' ? 'selected' : '' %>>
+                                                Medium</option>
+                                            <option value="Low" <%=task.priority==='Low' ? 'selected' : '' %>>Low
+                                            </option> <!-- Dropdown for task priority so we can change it -->
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Due Date</label>
+                                    <input type="date" name="due_date" class="form-control"
+                                        value="<%= task.due_date %>">
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Update Task</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <% }) %>
+
+                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+                <script>
+                    // Streak Loader
+                    fetch('/api/streak')
+                        .then(r => r.json())
+                        .then(data => document.getElementById('streakCount').textContent = data.streak);
+
+                    // 2. Filter Logic
+                    const catFilter = document.getElementById('filterCategory');
+                    const priFilter = document.getElementById('filterPriority');
+                    const taskItems = document.querySelectorAll('.task-card-item');
+                    function applyFilters() {
+                        const selectedCat = catFilter.value;
+                        const selectedPri = priFilter.value;
+
+                        taskItems.forEach(item => {
+                            const itemCat = item.getAttribute('data-category');
+                            const itemPri = item.getAttribute('data-priority');
+
+                            const catMatch = (selectedCat === 'all' || itemCat === selectedCat);
+                            const priMatch = (selectedPri === 'all' || itemPri === selectedPri);
+
+                            item.style.display = (catMatch && priMatch) ? 'block' : 'none';
+                        });
+                    }
+
+                    catFilter.addEventListener('change', applyFilters);
+                    priFilter.addEventListener('change', applyFilters);
+
+                    // Using Canvas to draw completion progress in circle
+                    const canvas = document.getElementById('completionCanvas');
+                    const ctx = canvas.getContext('2d');
+                    const rate = <%= stats.rate %>;
+
+                    function drawProgress(percent) {
+                        const centerX = canvas.width / 2, centerY = canvas.height / 2, radius = 60;
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.beginPath();
+                        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+                        ctx.strokeStyle = 'lightgray';
+                        ctx.lineWidth = 15;
+                        ctx.stroke(); //We are drawing the background circle
+
+                        const fullCircle = Math.PI * 2; // make a full circle
+                        const startAtTop = -Math.PI / 2; //since default starts at 3 o'clock position we rotate by 90 degrees to start at top
+                        const progressLength = fullCircle * (percent / 100); //length of arc based on percent
+                        const endAngle = startAtTop + progressLength; //will start at top and go clockwise
+
+                        let barColour = 'Red';
+                        if (percent > 70) barColour = 'Green'; // Green for >70%
+                        else if (percent > 40) barColour = 'Yellow'; // Yellow for >40%
+
+                        ctx.beginPath();
+                        ctx.arc(centerX, centerY, radius, startAtTop, endAngle);
+                        ctx.strokeStyle = barColour;
+                        ctx.lineWidth = 15;
+                        ctx.lineCap = 'round'; //rounded ends 
+                        ctx.stroke();
+
+                        ctx.font = 'bold 22px sans-serif';
+                        ctx.textAlign = 'center'; //center the text horizontally
+                        ctx.textBaseline = 'middle'; //center the text
+                        ctx.fillText(percent + '%', centerX, centerY);
+                    }
+                    drawProgress(rate);
+
+                    // Remote JSON API Quote 
+                    fetch('https://dummyjson.com/quotes/random') // Fetching random quote from dummyjson API
+                        .then(res => res.json())
+                        .then(data => {
+                            const quoteHtml = `
+                    <div class="card shadow-lg border-0 bg-info bg-opacity-10 mt-3">
+                        <div class="card-body">
+                            <h6 class="text-primary fw-bold"><i class="bi bi-chat-quote"></i> Daily Inspiration</h6>
+                            <p class="mb-1 small italic">"${data.quote}"</p> 
+                            <footer class="blockquote-footer mt-1 small text-end">${data.author}</footer>
+                        </div>
+                    </div>`;
+                            document.getElementById('rightSidebar').insertAdjacentHTML('beforeend', quoteHtml); // Inserting quote card into sidebar below new task form
+                        });
+                </script>
+</body>
+
+</html>

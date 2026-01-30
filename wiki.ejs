@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Technical Wiki - Productivity Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/style.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/"><i class="bi bi-fire me-2"></i>Productivity Hub</a>
+            <a class="btn btn-outline-light ms-auto" href="/">← Back to Dashboard</a>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-lg-8">
+                <h1 class="display-5 fw-bold mb-4">Implementation Wiki</h1>
+                <p class="lead text-muted mb-5">A documentation of the technical features and implementation details of this application.</p>
+
+                <div class="card shadow-sm mb-5 border-0 bg-white">
+                    <div class="card-header bg-primary text-white py-3">
+                        <h5 class="mb-0"><i class="bi bi-trophy-fill me-2"></i>Main Features</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li class="mb-3"><i class="bi bi-shield-check text-primary me-2"></i><strong>Bcrypt
+                                            Security:</strong> We don't store passwords in plain-text; we store encrypted "hashes" for safety.</li>
+                                    <li class="mb-3"><i
+                                            class="bi bi-database-fill-check text-primary me-2"></i><strong>Streaks:</strong> The daily streak is saved in the permanent SQL database,
+                                        not just temporary session memory.</li>
+                                    <li class="mb-3"><i class="bi bi-file-lock2 text-primary me-2"></i><strong>Captcha
+                                            Protection:</strong> A custom math-captcha API protects the login page. </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li class="mb-3"><i class="bi bi-pencil-square text-primary me-2"></i><strong>Dynamic
+                                            Graphics:</strong> We used Canvas API to draw the progress rings.</li>
+                                    <li class="mb-3"><i
+                                            class="bi bi-lightning-fill text-primary me-2"></i><strong>Instant
+                                            Filters:</strong> Our task filters work instantly without reloading the
+                                        page.</li>
+                                    <li class="mb-3"><i class="bi bi-cloud-download text-primary me-2"></i><strong>Live
+                                            Quotes:</strong> We fetch real-time data from an external "Quotes API" to
+                                        keep your dashboard fresh.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-4 border-0">
+
+                    <div class="card-header bg-dark text-white py-3">
+
+                        <h6 class="mb-0">1. Data Visualization: HTML5 Canvas & Logic</h6>
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <p>To provide high-level analytical feedback, we implemented a custom <strong>HTML5 Canvas
+                                Meter</strong> and <strong>Success Ratio</strong> system.</p>
+
+                        <p><strong>Dynamic Drawing:</strong> Using the 2D Context API, the completion ring is rendered
+                            by calculating the arc using <code>Math.PI</code>. We implemented a "color-shift" logic
+                            where the stroke style dynamically updates (Red to Green) based on the task completion
+                            percentage.</p>
+
+                        <p><strong>Category Specific Progress:</strong> The dashboard moves beyond simple counts by calculating
+                            <code>stats.catDone / stats.categories</code>. This provides users with a specific
+                            achievement percentage for each domain (Work, Personal, etc.), rather than just global
+                            density.</p>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="card shadow-sm mb-4 border-0">
+
+                    <div class="card-header bg-dark text-white py-3">
+
+                        <h6 class="mb-0">2. Security: Bcrypt Hashing & Math Captcha API</h6>
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <p>Security is implemented through multi-layered verification and encryption.</p>
+
+                        <p><strong>Bcrypt Hashing:</strong> We implemented <code>bcrypt.hash()</code> with 10 salt
+                            rounds during database initialization. This ensures that user credentials are stored as
+                            irreversible cryptographic strings, protecting against data breaches.</p>
+
+                        <p><strong>Dynamic Challenge:</strong> We built a
+                            <strong>Custom Math Captcha API</strong>. This route (<code>/api/login-captcha</code>)
+                            generates a unique math problem per session, stores the answer in <code>req.session</code>,
+                            and validates the user's response server-side before allowing authentication.</p>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="card shadow-sm mb-4 border-0">
+
+                    <div class="card-header bg-dark text-white py-3">
+
+                        <h6 class="mb-0">3. User Experience: Interactive Filters & SQL Streaks</h6>
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <p>User engagement and ease of use are prioritized through state management.</p>
+
+                        <p><strong>Task Based Filtering:</strong> Every task card is embedded with
+                            <code>data-category</code> and <code>data-priority</code> attributes. Our JavaScript engine
+                            listens for change events on filter dropdowns to instantly toggle card visibility, providing
+                            a responsive experience.</p>
+
+                        <p><strong>Streaks:</strong> We migrated streak tracking from session memory
+                            to <strong>SQL Storage</strong>. By comparing the <code>last_login_date</code> in
+                            the Users table with the current system time, we ensure that user progress is
+                            synchronized and never lost upon logout.</p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-4">
+
+                <div class="card shadow border-0 sticky-top" style="top: 20px;">
+
+                    <div class="card-body">
+
+                        <h6 class="fw-bold mb-3"><i class="bi bi-map-fill me-2"></i>Express Route Map</h6>
+
+                        <ul class="list-group list-group-flush small mb-4">
+
+                            <li class="list-group-item"><strong>Home:</strong> <code>GET /</code></li>
+
+                            <li class="list-group-item"><strong>Auth Page:</strong> <code>GET /login</code></li>
+
+                            <li class="list-group-item"><strong>Auth Logic:</strong> <code>POST /login</code></li>
+
+                            <li class="list-group-item"><strong>Log Out:</strong> <code>GET /logout</code></li>
+
+                            <li class="list-group-item"><strong>Task Create:</strong> <code>POST /tasks</code></li>
+
+                            <li class="list-group-item"><strong>Task Edit:</strong> <code>POST /tasks/:id/edit</code>
+                            </li>
+
+                            <li class="list-group-item"><strong>Task Done:</strong>
+                                <code>POST /tasks/:id/complete</code></li>
+
+                            <li class="list-group-item"><strong>Task Delete:</strong>
+                                <code>POST /tasks/:id/delete</code></li>
+
+                            <li class="list-group-item"><strong>Captcha API:</strong>
+                                <code>GET /api/login-captcha</code></li>
+
+                            <li class="list-group-item"><strong>Streak API:</strong> <code>GET /api/streak</code></li>
+
+                            <li class="list-group-item"><strong>Wiki View:</strong> <code>GET /wiki</code></li>
+
+                        </ul>
+
+
+
+                        <h6 class="fw-bold mb-2">Technical Stack</h6>
+
+                        <div class="d-flex flex-wrap gap-1">
+
+                            <span class="badge bg-secondary">Express.js</span>
+
+                            <span class="badge bg-secondary">SQLite3</span>
+
+                            <span class="badge bg-secondary">EJS</span>
+
+                            <span class="badge bg-secondary">Bcrypt</span>
+
+                            <span class="badge bg-secondary">Bootstrap 5</span>
+
+                            <span class="badge bg-secondary">Fetch API</span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>
